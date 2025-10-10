@@ -1,0 +1,16 @@
+# Core dependencies from the script
+numpy
+torch
+ultralytics==8.3.208  # Usa l'ultima versione che hai indicato
+codecarbon
+
+# Polars (Dipendenza critica per Ultralytics)
+# La versione deve essere compatibile con la tua installazione Python (idealmente 3.10+)
+polars
+
+# Dipendenze tipiche necessarie per il training e il logging di Ultralytics/PyTorch
+tqdm
+pandas             # Spesso richiesta indirettamente
+matplotlib
+pyyaml
+scipy

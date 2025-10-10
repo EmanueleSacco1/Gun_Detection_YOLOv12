@@ -1,1 +1,0 @@
-# Gun_Detection_YOLOv12

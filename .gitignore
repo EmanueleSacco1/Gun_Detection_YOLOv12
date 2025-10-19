@@ -4,6 +4,16 @@
 /Machine_Gun
 /No_Gun
 
+yolo11n.pt
+yolo12s.pt 
+
+fold_1_data.yaml
+fold_2_data.yaml
+
+co2_emissions_log.txt
+co2_emissions_log.txt.bak
+co2_emissions_log.txt_0.bak
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

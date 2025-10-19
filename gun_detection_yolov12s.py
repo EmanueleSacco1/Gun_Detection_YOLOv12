@@ -21,7 +21,7 @@ print(torch.version.cuda)
 
 # Critical check: ensure a CUDA-enabled GPU is available before proceeding
 if not torch.cuda.is_available():
-    raise RuntimeError("CUDA-enabled GPU non trovata. Lo script richiede una GPU con supporto CUDA.")
+    raise RuntimeError("CUDA-enabled GPU not found. The script requires a GPU with CUDA support.")
 
 # Set the device for all operations to GPU
 device = 'cuda'
@@ -40,7 +40,7 @@ def log_emissions(emissions, total=False):
 # --- Checkpoint Management Function ---
 def find_last_checkpoint(save_path):
     """
-    Scans the training run directory for the latest epoch checkpoint file.
+    Scans the training run directory for the latest epoch checkpoint file (epoch_X.pt).
     Returns the path to the latest .pt file or None if not found.
     """
     weights_dir = os.path.join(save_path, 'weights')
@@ -65,8 +65,18 @@ def run_cross_validation(num_folds=2, epochs=150, checkpoint_interval=10, resume
     with open(emissions_log_file, 'w') as f:
         f.write("CO2 Emissions Log\n==================\n")
 
-    # Iterate over each K-Fold
-    for fold in range(1, num_folds + 1):
+    # Define the name of the required base model file
+    model_name = 'yolo12s.pt'
+    
+    # --- Critical Local File Check (Prevents Unnecessary Downloads) ---
+    # Ensures yolo12s.pt is present locally to bypass Ultralytics fallback logic.
+    if not os.path.exists(model_name):
+        raise FileNotFoundError(
+            f"FATAL ERROR: The required base model file '{model_name}' was not found in the current directory."
+        )
+
+    # Loop through each fold defined by num_folds
+    for fold in range(1, num_folds + 1): 
         print(f"\n--- Fold {fold} ---")
 
         # Define dataset paths for the current fold
@@ -90,28 +100,46 @@ def run_cross_validation(num_folds=2, epochs=150, checkpoint_interval=10, resume
         # Define project and name for Ultralytics run save directories
         train_project_dir = os.path.join(current_dir, "runs", "detect")
         train_save_name = f"train_fold_{fold}"
-        train_save_path = os.path.join(train_project_dir, train_save_name)
+        run_dir = os.path.join(train_project_dir, train_save_name)
         
         # --- Model Loading and Resume Logic (YOLOv12 Obligatory) ---
-        model_name = 'yolo12s.pt' 
-        last_checkpoint = find_last_checkpoint(train_save_path)
+        last_checkpoint = find_last_checkpoint(run_dir)
         
-        if resume_from_last_checkpoint and last_checkpoint:
-            # Load the model from the identified checkpoint to resume training
-            print(f"Resuming training for fold {fold} from checkpoint: {last_checkpoint}")
-            model = YOLO(last_checkpoint)
-            resume_flag = True 
+        # Variable to hold the actual model path (base model or checkpoint)
+        model_to_load = model_name 
+        
+        if resume_from_last_checkpoint:
+            
+            # Path to the generic last checkpoint ('last.pt')
+            last_pt_path = os.path.join(run_dir, 'weights', 'last.pt')
+            
+            if last_checkpoint:
+                # Case 1: Found a specific epoch_X.pt checkpoint (most reliable)
+                print(f"Resuming training for fold {fold} from specific checkpoint: {last_checkpoint}")
+                model_to_load = last_checkpoint
+                resume_flag = True
+            elif os.path.exists(last_pt_path):
+                 # Case 2: Found 'last.pt' (covers the scenario where epoch_X.pt failed to save)
+                print(f"Resuming training for fold {fold} from last.pt: {last_pt_path}")
+                model_to_load = last_pt_path
+                resume_flag = True
+            else:
+                # Case 3: No checkpoints found. Starting from base model.
+                print(f"No checkpoint found in {run_dir}. Starting from base model {model_name}.")
+                model_to_load = model_name
+                resume_flag = False
         else:
-            # Load the base model (YOLOv12s)
-            print(f"Attempting to load the base model {model_name}...")
-            try:
-                model = YOLO(model_name)
-            except Exception as e:
-                # If YOLOv12s fails to load (e.g., file not found or corrupted), raise an error
-                raise RuntimeError(f"FATAL ERROR: Failed to load the required model {model_name}. Error: {e}")
+            # New training: load the base model
+            print(f"Attempting to load the base model {model_name} for a new run...")
+            model_to_load = model_name
             resume_flag = False
-
         
+        # Load the model (either base model or checkpoint)
+        try:
+            model = YOLO(model_to_load)
+        except Exception as e:
+            raise RuntimeError(f"FATAL ERROR: Failed to load model {model_to_load}. The file may be corrupted. Error: {e}")
+            
         # --- Emissions Tracking Start ---
         tracker = EmissionsTracker(log_level="WARNING", output_file=emissions_log_file)
         try:
@@ -120,19 +148,38 @@ def run_cross_validation(num_folds=2, epochs=150, checkpoint_interval=10, resume
             print(f"Error starting emissions tracker: {e}")
 
         # --- Training Phase Execution ---
-        model.train(
-            data=data_yaml_path,
-            epochs=epochs,
-            imgsz=640,
-            batch=16,
-            device=device,
-            workers=8,
-            plots=True,
-            project=train_project_dir,
-            name=train_save_name,
-            save_period=checkpoint_interval,
-            resume=resume_flag # Pass the determined resume flag
-        )
+        
+        if resume_flag:
+            # If resuming, we rely on the model loaded from the checkpoint.
+            # We omit 'project' and 'name' to force Ultralytics to continue in the model's existing directory.
+            print(f"Resuming training directly in the loaded model's directory.")
+            model.train(
+                data=data_yaml_path,
+                epochs=epochs,
+                imgsz=640,
+                batch=16,
+                device=device,
+                workers=8,
+                plots=True,
+                save_period=checkpoint_interval,
+                resume=True # Forces the resume state
+            )
+        else:
+            # New training: use project/name to create the new fold directory
+            model.train(
+                data=data_yaml_path,
+                epochs=epochs,
+                imgsz=640,
+                batch=16,
+                device=device,
+                workers=8,
+                plots=True,
+                project=train_project_dir,
+                name=train_save_name,
+                save_period=checkpoint_interval,
+                resume=False
+            )
+
 
         # --- Validation Phase Execution ---
         val_save_name = f"val_fold_{fold}"
@@ -174,5 +221,6 @@ def run_cross_validation(num_folds=2, epochs=150, checkpoint_interval=10, resume
 
 # --- Script Entry Point ---
 if __name__ == '__main__':
-    # Start the cross-validation process
+    # ACTION: Set 'resume_from_last_checkpoint=True' to continue training from the last saved epoch.
+    # If the script successfully resumed Fold 2, it should now continue or complete the remaining folds.
     run_cross_validation(num_folds=2, epochs=150, checkpoint_interval=10, resume_from_last_checkpoint=False)

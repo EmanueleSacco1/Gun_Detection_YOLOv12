@@ -6,6 +6,7 @@
 
 yolo11n.pt
 yolo12s.pt 
+yolo12l.pt 
 
 fold_1_data.yaml
 fold_2_data.yaml

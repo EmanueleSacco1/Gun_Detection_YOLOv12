@@ -80,7 +80,7 @@ def run_cross_validation(num_folds=5, epochs=5, checkpoint_interval=10, resume_f
         print(f"\n--- Fold {fold} ---")
 
         # Define dataset paths for the current fold
-        folds_root = os.path.join(current_dir, "Preprocessing", "k_folds")
+        folds_root = os.path.join(current_dir, "k_folds")
         train_images = os.path.join(folds_root, f'fold_{fold}', 'training', 'images')
         test_images = os.path.join(folds_root, f'fold_{fold}', 'test', 'images')
 

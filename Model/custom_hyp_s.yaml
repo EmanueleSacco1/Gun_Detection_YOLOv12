@@ -1,0 +1,16 @@
+# custom_hyp_s.yaml
+
+# --- Augmentation Parameters for Generalization ---
+hsv_h: 0.015      # (Hue) Color rotation
+hsv_s: 0.7        # (Saturation) Saturation shift
+hsv_v: 0.4        # (Value) Brightness shift
+degrees: 0.0      # (Rotation) Rotation (typically kept low for detection)
+translate: 0.15   # (Translation) Random translation (increased to 0.15)
+scale: 0.8        # (Scale) Random scaling/zoom (stronger variation)
+shear: 0.0        # (Shear) Shearing
+perspective: 0.0  # (Perspective) Perspective distortion
+flipud: 0.0       # (Flip Up/Down) Vertical flip (usually disabled for stable objects)
+fliplr: 0.5       # (Flip Left/Right) Horizontal flip (50% chance - essential)
+mosaic: 1.0       # (Mosaic) Image mixing (CRITICAL for context generalization)
+mixup: 0.05       # (MixUp) Interpolation of 2 images (Added a small amount for robustness)
+copy_paste: 0.0   # (Copy-Paste)

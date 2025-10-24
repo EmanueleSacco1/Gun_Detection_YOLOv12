@@ -1,6 +1,6 @@
-/frames
+/Preprocessing/frames
 /k_folds
-/raw_dataset 
+/Preprocessing/raw_dataset 
 /runs
 
 yolo11n.pt

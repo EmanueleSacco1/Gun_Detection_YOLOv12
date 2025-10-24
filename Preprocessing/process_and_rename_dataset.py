@@ -116,7 +116,7 @@ if __name__ == "__main__":
     # --- Configuration ---
     RAW_DATASET_NAME = 'raw_dataset' # The name of your single input folder
     RAW_DATASET_PATH = os.path.join(current_dir, RAW_DATASET_NAME)
-    OUTPUT_FRAMES_PATH = os.path.join(current_dir, 'frames') # The final destination folder
+    OUTPUT_FRAMES_PATH = os.path.join(current_dir, 'Preprocessing', 'frames') # The final destination folder
     
     if not os.path.isdir(RAW_DATASET_PATH):
         print(f"CRITICAL ERROR: The input folder '{RAW_DATASET_NAME}' was not found at {RAW_DATASET_PATH}.")

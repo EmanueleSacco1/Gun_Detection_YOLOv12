@@ -6,22 +6,25 @@ import seaborn as sns
 from typing import List, Dict, Any
 
 # --- GLOBAL CONFIGURATION ---
-# Define the root folders for I/O operations
+# Base directory for the script (assumes the script is inside the 'Results' folder)
 BASE_DIR = 'Results'
-DATA_SUBFOLDER = os.path.join(BASE_DIR, 'Data')
+# Correctly navigate up one level from 'Results' to the project root, then into 'runs/detect'
+RUNS_DIR = os.path.join(os.path.dirname(os.getcwd()), 'runs', 'detect') 
+DATA_SUBFOLDER = 'Data' # Folder where result CSVs are expected to be copied inside BASE_DIR
 PLOTS_SUBFOLDER = os.path.join(BASE_DIR, 'Plots')
-EMISSIONS_OUTPUT_FILE = os.path.join(BASE_DIR, 'emissions_summary.txt')
 
-# Define the names of the model runs to analyze (e.g., 'yolov12l_75', 'yolov12s_150')
-# You must adjust this list to match the names of your result subfolders in Results/Data/
-MODEL_RUN_FOLDERS = ['yolov12l_75_biclass_fold_1_to_5'] # EXAMPLE: ADJUST THIS LIST
+# Define the names of the model runs to analyze (Must adjust this list to match your subfolders)
+# Example: If your training created folders like runs/detect/yolov12s_150_fold_1, etc.
+# You need to manually copy your CSVs to Results/Data/yolov12s_150/
+MODEL_RUN_FOLDERS = ['yolov12s_150_sample'] # EXAMPLE: ADJUST THIS LIST (Folder names containing results1.csv...results5.csv)
 
 # --- HELPER FUNCTIONS ---
 
 def create_output_dirs():
     """Ensures the necessary output directories exist."""
+    # os.makedirs(DATA_SUBFOLDER, exist_ok=True) # Assuming data is manually copied here
     os.makedirs(PLOTS_SUBFOLDER, exist_ok=True)
-    print(f"Output directories created/verified: {BASE_DIR}/Plots")
+    print(f"Output directories verified: {os.path.abspath(PLOTS_SUBFOLDER)}")
 
 def calculate_f1(precision: float, recall: float) -> float:
     """Calculates the F1-measure from precision and recall."""
@@ -31,11 +34,10 @@ def calculate_f1(precision: float, recall: float) -> float:
 
 def get_best_metrics(file_path: str) -> Dict[str, float]:
     """Extracts the maximum values for key metrics from a single fold's results CSV."""
-    # Note: Ultralytics often tracks precision/recall for the whole dataset (B)
     data = pd.read_csv(file_path)
     data.columns = data.columns.str.strip() # Clean column names
     
-    # Ensure columns are numeric, coercing non-numeric values to NaN
+    # Ensure columns are numeric
     data['metrics/precision(B)'] = pd.to_numeric(data['metrics/precision(B)'], errors='coerce')
     data['metrics/recall(B)'] = pd.to_numeric(data['metrics/recall(B)'], errors='coerce')
     data['metrics/mAP50(B)'] = pd.to_numeric(data['metrics/mAP50(B)'], errors='coerce')
@@ -45,7 +47,7 @@ def get_best_metrics(file_path: str) -> Dict[str, float]:
     best_recall = data['metrics/recall(B)'].max()
     best_mAP50 = data['metrics/mAP50(B)'].max()
     
-    # Calculate F1-measure using the best achieved precision and recall
+    # Calculate F1-measure
     best_f1 = calculate_f1(best_precision, best_recall)
     
     return {
@@ -89,12 +91,10 @@ def summarize_metrics(csv_files: List[str]):
 
 # --- 2. CONFUSION MATRIX PLOTTING (Adapted from plot_avg_confusion_matrix.py) ---
 
-# Note: The raw input data is hardcoded in the original script. 
-# In a real scenario, this data would be dynamically loaded from a combined CSV or JSON output.
-# We will use the provided hardcoded values for demonstration.
-
+# NOTE: Hardcoded CM values are used for demonstration. Adjust these values based on your actual validation results.
+# Format: [TP, FP, FN, TN]. TN is typically 0 in object detection for simplified CMs.
 HARDCODED_CM = np.array([
-    [8630, 7645, 3809, 0],  # Fold 1: [TP, FP, FN, TN]
+    [8630, 7645, 3809, 0],  # Fold 1 
     [9227, 7212, 4788, 0],  # Fold 2
     [10666, 7281, 6010, 0],  # Fold 3
     [9951, 7058, 4653, 0],  # Fold 4
@@ -106,13 +106,11 @@ def save_confusion_matrix(matrix: np.ndarray, title: str, filename: str, is_aver
     sns.set_style("whitegrid")
     
     # Reshape [TP, FP, FN, TN] into a 2x2 matrix: [[TP, FP], [FN, TN]]
-    # Note: TN is 0 because object detection CMs are typically calculated relative to object instances,
-    # where TN is massive and ignored, or simplified to a 2x2 with 'background'.
     confusion_matrix_reshaped = np.array([[matrix[0], matrix[1]], [matrix[2], matrix[3]]])
 
     plt.figure(figsize=(8, 6))
     
-    # Determine labels (assuming classes are Gun/Human or simplified)
+    # Use standard labels for the biclass output (Gun, Human)
     labels = classes if classes else ['Gun', 'Human'] 
     
     sns.heatmap(confusion_matrix_reshaped, 
@@ -125,8 +123,6 @@ def save_confusion_matrix(matrix: np.ndarray, title: str, filename: str, is_aver
     plt.xlabel('Predicted Class')
     plt.title(title)
 
-    # Save the figure to the Plots directory
-    os.makedirs(PLOTS_SUBFOLDER, exist_ok=True)
     plt.savefig(os.path.join(PLOTS_SUBFOLDER, filename))
     plt.close()
 
@@ -137,10 +133,10 @@ def process_confusion_matrices(cm_array: np.ndarray):
     average_matrix = np.mean(cm_array, axis=0)
     
     # Save the sum confusion matrix
-    save_confusion_matrix(sum_matrix, 'Sum of Confusion Matrices (5 Folds)', 'sum_confusion_matrix.png', classes=['TP/Gun', 'FP/Human'])
+    save_confusion_matrix(sum_matrix, 'Sum of Confusion Matrices (5 Folds)', 'sum_confusion_matrix.png', classes=['Gun', 'Human'])
     
     # Save the average confusion matrix
-    save_confusion_matrix(average_matrix, 'Average Confusion Matrix (5 Folds)', 'average_confusion_matrix.png', is_average=True, classes=['TP/Gun', 'FP/Human'])
+    save_confusion_matrix(average_matrix, 'Average Confusion Matrix (5 Folds)', 'average_confusion_matrix.png', is_average=True, classes=['Gun', 'Human'])
     
     print("\n--- Confusion Matrix Analysis ---")
     print("Sum Matrix [TP, FP, FN, TN]:", sum_matrix)
@@ -211,7 +207,7 @@ def plot_all_results(subfolder: str):
         plt.plot(mean_df[train_field], label='Mean Train', color='blue', linewidth=2)
         plt.plot(mean_df[val_field], label='Mean Validation', color='red', linestyle='--', linewidth=2)
         
-        combined_title = f'{subfolder}: {train_field.split("/")[1].title()} Comparison (Mean)'
+        combined_title = f'{subfolder}: {train_field.split("/")[1].title()} Loss Comparison (Mean)'
         plt.title(combined_title, fontsize=title_font_size)
         plt.legend(fontsize=legend_font_size)
         plt.xlabel('Epochs', fontsize=axis_label_font_size)
@@ -249,12 +245,6 @@ def plot_best_epoch(subfolder: str):
     Calculates the optimal epoch for each fold based on a weighted combined score 
     and plots the metrics with the optimal epoch marked.
     """
-    # Define plotting aesthetics
-    axis_label_font_size = 14
-    tick_label_font_size = 12
-    title_font_size = 16
-    legend_font_size = 10
-
     subfolder_path = os.path.join(DATA_SUBFOLDER, subfolder)
     csv_files = [os.path.join(subfolder_path, f'results{i}.csv') for i in range(1, 6)]
 
@@ -333,60 +323,6 @@ def plot_best_epoch(subfolder: str):
     print(f"✅ Optimal epoch plots for {subfolder} saved.")
 
 
-# --- 5. CO2 EMISSIONS SUMMARIZATION (Adapted from calculate_emissions.py) ---
-
-def summarize_emissions():
-    """Reads emissions.csv files, calculates total CO2 emissions per run, and saves a summary."""
-    
-    emissions_sums = {}
-    print("\n--- CO2 Emissions Processing ---")
-
-    # Loop through each model run folder
-    for run_folder in MODEL_RUN_FOLDERS:
-        # Assumes the emissions.csv is directly inside the run folder (e.g., Results/yolov12l_75/emissions.csv)
-        emissions_file_path = os.path.join(BASE_DIR, run_folder, 'emissions.csv')
-        
-        if not os.path.exists(emissions_file_path):
-             # Try to find the file inside a sub-structure common for CodeCarbon logging
-             emissions_file_path = os.path.join(BASE_DIR, run_folder, 'runs', 'detect', 'train_fold_1', 'emissions.csv') # Example check
-             if not os.path.exists(emissions_file_path):
-                 print(f"⚠️ Warning: emissions.csv not found for run {run_folder}. Skipping.")
-                 continue
-
-        try:
-            # Read the CSV file
-            df = pd.read_csv(emissions_file_path)
-            df.columns = df.columns.str.strip() # Clean column names
-
-            if 'emissions' in df.columns:
-                # Convert emissions to numeric and handle errors (e.g., if there's a header line)
-                df['emissions'] = pd.to_numeric(df['emissions'], errors='coerce') 
-                
-                # Calculate total emissions, ignoring NaN values
-                total_emissions = df['emissions'].sum()
-
-                emissions_sums[run_folder] = total_emissions
-                print(f"✅ {run_folder}: {total_emissions:.4f} kg CO2")
-            else:
-                print(f"❌ Error: 'emissions' column not found in {emissions_file_path}")
-
-        except Exception as e:
-            print(f"❌ Error reading or processing {emissions_file_path}: {e}")
-            
-    # Calculate the grand total emissions across all analyzed runs
-    grand_total_emissions = sum(emissions_sums.values())
-
-    # Write the results to a text file
-    with open(EMISSIONS_OUTPUT_FILE, 'w') as f:
-        f.write("CO2 Emissions Summary (kg CO2)\n")
-        f.write("==============================\n")
-        for subfolder, total in emissions_sums.items():
-            f.write(f"{subfolder}: {total:.4f}\n")
-        f.write(f"\nTotal Emissions Analyzed: {grand_total_emissions:.4f} kg CO2\n")
-
-    print(f"Results saved to {EMISSIONS_OUTPUT_FILE}")
-
-
 # --- MAIN EXECUTION ---
 
 if __name__ == '__main__':
@@ -411,8 +347,5 @@ if __name__ == '__main__':
 
     # 2. Process and plot confusion matrices (using hardcoded data for demonstration)
     process_confusion_matrices(HARDCODED_CM)
-
-    # 3. Summarize CO2 Emissions
-    summarize_emissions()
     
     print("\n\n--- ALL POST-TRAINING ANALYSIS COMPLETE ---")

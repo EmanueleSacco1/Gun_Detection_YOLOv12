@@ -6,18 +6,18 @@ from ultralytics import YOLO
 # Define the root directory of the project
 current_dir = os.getcwd()
 
-# ⚠️ SET YOUR VIDEO FILENAME HERE ⚠️
+#  SET YOUR VIDEO FILENAME HERE 
 VIDEO_FILENAME = 'test_video.mp4' 
 
 # Full path to the source video file, expected to be in the 'Testing' folder
-source_video_path = os.path.join(current_dir, 'Testing', VIDEO_FILENAME)
+source_video_path = os.path.join(current_dir, 'Test', 'Testing', VIDEO_FILENAME)
 
 # Path to the specific BEST model checkpoint to be used for inference.
 # Example uses YOLOv12l Fold 1. ADJUST THE PATH IF NECESSARY.
-MODEL_PATH = os.path.join(current_dir, "Results YOLOv12l", "runs", "detect", "train_fold_1", "weights", "best.pt")
+MODEL_PATH = os.path.join(current_dir, 'Results' "Results YOLOv12s", "runs", "detect", "train_fold_1", "weights", "best.pt")
 
 # Output directory for saving inference results (if 'save=True' is enabled)
-OUTPUT_PROJECT_DIR = os.path.join(current_dir, 'Testing', 'Realtime_Output')
+OUTPUT_PROJECT_DIR = os.path.join(current_dir, 'Test', 'Testing', 'Realtime_Output')
 OUTPUT_RUN_NAME = 'live_run_yolo12l_f1'
 
 # --- Initial Verification Checks ---

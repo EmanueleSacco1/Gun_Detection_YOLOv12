@@ -57,7 +57,7 @@ def find_last_checkpoint(save_path):
     return None
 
 # --- Main Cross-Validation Execution Function ---
-def run_cross_validation(num_folds=5, epochs=5, checkpoint_interval=10, resume_from_last_checkpoint=False):
+def run_cross_validation(num_folds=5, epochs=150, checkpoint_interval=10, resume_from_last_checkpoint=False):
     fold_performances = []  # List to store validation mAP for each fold
     total_emissions = 0.0   # Accumulator for overall CO2 emissions
 
@@ -66,7 +66,7 @@ def run_cross_validation(num_folds=5, epochs=5, checkpoint_interval=10, resume_f
         f.write("CO2 Emissions Log\n==================\n")
 
     # Define the name of the required base model file
-    model_name = 'yolo12l.pt'
+    model_name = 'yolo12s.pt'
     
     # --- Critical Local File Check (Prevents Unnecessary Downloads) ---
     # Ensures yolo12s.pt is present locally to bypass Ultralytics fallback logic.
@@ -80,7 +80,7 @@ def run_cross_validation(num_folds=5, epochs=5, checkpoint_interval=10, resume_f
         print(f"\n--- Fold {fold} ---")
 
         # Define dataset paths for the current fold
-        folds_root = os.path.join(current_dir, "k_folds")
+        folds_root = os.path.join(current_dir, "Preprocessing", "k_folds")
         train_images = os.path.join(folds_root, f'fold_{fold}', 'training', 'images')
         test_images = os.path.join(folds_root, f'fold_{fold}', 'test', 'images')
 
@@ -157,7 +157,7 @@ def run_cross_validation(num_folds=5, epochs=5, checkpoint_interval=10, resume_f
                 data=data_yaml_path,
                 epochs=epochs,
                 imgsz=640,
-                batch=8,
+                batch=16,
                 device=device,
                 workers=8,
                 plots=True,
@@ -170,7 +170,7 @@ def run_cross_validation(num_folds=5, epochs=5, checkpoint_interval=10, resume_f
                 data=data_yaml_path,
                 epochs=epochs,
                 imgsz=640,
-                batch=8,
+                batch=16,
                 device=device,
                 workers=8,
                 plots=True,
@@ -186,7 +186,7 @@ def run_cross_validation(num_folds=5, epochs=5, checkpoint_interval=10, resume_f
         val_results = model.val(
             data=data_yaml_path,
             device=device,
-            batch=8,
+            batch=16,
             workers=8,
             project=train_project_dir,
             name=val_save_name,
@@ -223,4 +223,4 @@ def run_cross_validation(num_folds=5, epochs=5, checkpoint_interval=10, resume_f
 if __name__ == '__main__':
     # ACTION: Set 'resume_from_last_checkpoint=True' to continue training from the last saved epoch.
     # If the script successfully resumed Fold 2, it should now continue or complete the remaining folds.
-    run_cross_validation(num_folds=5, epochs=5, checkpoint_interval=10, resume_from_last_checkpoint=True)
+    run_cross_validation(num_folds=5, epochs=150, checkpoint_interval=10, resume_from_last_checkpoint=False)

@@ -7,12 +7,12 @@ from ultralytics import YOLO
 current_dir = os.getcwd()
 
 # Base path for the results folders containing 'runs/detect'
-RESULTS_ROOT = os.path.join(current_dir, "Results YOLOv12") 
+RESULTS_ROOT = os.path.join(current_dir, "Results", "Results YOLOv12s") 
 
 # Folder name containing the test images
 TEST_IMAGE_FOLDER = 'Testing'
 # Full path to the source images
-source_image_path = os.path.join(current_dir, TEST_IMAGE_FOLDER)
+source_image_path = os.path.join(current_dir, "Test", TEST_IMAGE_FOLDER)
 
 # Output directory path (results will be saved within the 'Testing' folder)
 OUTPUT_PROJECT_DIR = source_image_path
@@ -23,11 +23,11 @@ OUTPUT_PROJECT_DIR = source_image_path
 # Keys are used as the output subfolder names.
 MODELS_TO_TEST = {
     # YOLOv12-Small Folds 
-    "yolov12s_fold1": os.path.join(current_dir, "Results YOLOv12s", "runs", "detect", "train_fold_1", "weights", "best.pt"),
-    "yolov12s_fold2": os.path.join(current_dir, "Results YOLOv12s", "runs", "detect", "train_fold_2", "weights", "best.pt"),
+    "yolov12s_fold1": os.path.join(current_dir, "Results", "Results YOLOv12s", "runs", "detect", "train_fold_1", "weights", "best.pt"),
+    "yolov12s_fold2": os.path.join(current_dir, "Results", "Results YOLOv12s", "runs", "detect", "train_fold_2", "weights", "best.pt"),
     # YOLOv12-Large Folds 
-    "yolov12l_fold1": os.path.join(current_dir, "Results YOLOv12l", "runs", "detect", "train_fold_1", "weights", "best.pt"),
-    "yolov12l_fold2": os.path.join(current_dir, "Results YOLOv12l", "runs", "detect", "train_fold_2", "weights", "best.pt"),
+    #"yolov12l_fold1": os.path.join(current_dir, "Results", "Results YOLOv12l", "runs", "detect", "train_fold_1", "weights", "best.pt"),
+    #"yolov12l_fold2": os.path.join(current_dir, "Results", "Results YOLOv12l", "runs", "detect", "train_fold_2", "weights", "best.pt"),
 }
 
 # --- Main Testing Function ---

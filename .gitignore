@@ -1,8 +1,6 @@
 /frames
-/Handgun
 /k_folds
-/Machine_Gun
-/No_Gun
+/raw_dataset 
 
 yolo11n.pt
 yolo12s.pt 

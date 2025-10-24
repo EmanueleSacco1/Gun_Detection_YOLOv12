@@ -89,8 +89,8 @@ def run_cross_validation(num_folds=2, epochs=5, checkpoint_interval=10, resume_f
         data_yaml_content = f"""
         train: {train_images}
         val: {test_images}
-        nc: 1
-        names: ['Gun']
+        nc: 2
+        names: ['Gun', 'Human']
         """
         # Save the YAML content to a temporary file
         data_yaml_path = os.path.join(current_dir, f'fold_{fold}_data.yaml')

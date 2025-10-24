@@ -1,6 +1,7 @@
 /frames
 /k_folds
 /raw_dataset 
+/runs
 
 yolo11n.pt
 yolo12s.pt 
@@ -8,6 +9,9 @@ yolo12l.pt
 
 fold_1_data.yaml
 fold_2_data.yaml
+fold_3_data.yaml
+fold_4_data.yaml
+fold_5_data.yaml
 
 co2_emissions_log.txt
 co2_emissions_log.txt.bak

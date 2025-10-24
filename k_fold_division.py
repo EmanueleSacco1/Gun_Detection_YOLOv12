@@ -110,7 +110,7 @@ def divide_images_and_texts_into_groups(root_dir=".", frames_folder="frames", ou
 if __name__ == "__main__":
     # Allows command-line specification for number of groups (folds)
     parser = argparse.ArgumentParser(description="Divide images and labels into K-folds for cross-validation.")
-    parser.add_argument('--num_groups', type=int, default=2, help='Number of folds (K) to divide the dataset into.')
+    parser.add_argument('--num_groups', type=int, default=5, help='Number of folds (K) to divide the dataset into.')
     args = parser.parse_args()
     
     # Execute from the project root directory

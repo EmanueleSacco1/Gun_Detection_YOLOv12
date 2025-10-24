@@ -1,16 +1,28 @@
+# -------------------------------------------------------#
+# List of dependencies for Gun Detection YOLOv12 project #
+# -------------------------------------------------------#
+
+#=============================================#
+# Python version: 3.12.0 / Cuda version: 13.0 #
+#=============================================#
+
 # Core dependencies from the script
-numpy
-torch
-ultralytics==8.3.208  # Usa l'ultima versione che hai indicato
-codecarbon
+numpy==1.26.1
+torch==2.5.1
+torchaudio==2.5.1
+torchvision==0.20.1
+ultralytics==8.3.208  
+codecarbon==3.0.7
 
-# Polars (Dipendenza critica per Ultralytics)
-# La versione deve essere compatibile con la tua installazione Python (idealmente 3.10+)
-polars
+# Polars (Critical dependency for Ultralytics)
+polars==1.34.0
 
-# Dipendenze tipiche necessarie per il training e il logging di Ultralytics/PyTorch
-tqdm
-pandas             # Spesso richiesta indirettamente
-matplotlib
-pyyaml
-scipy
+# Typical dependencies needed for Ultralytics/PyTorch training and logging
+tqdm                  # For progress bars
+pandas==2.3.3             # Often indirectly required
+matplotlib==3.10.7     # For plotting training results
+pyyaml              # For YAML file handling
+scipy           # For scientific computations
+
+# Dependencies needed for analysis
+seaborn         # For enhanced plotting

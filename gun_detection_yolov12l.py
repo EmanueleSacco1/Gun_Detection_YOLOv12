@@ -57,7 +57,7 @@ def find_last_checkpoint(save_path):
     return None
 
 # --- Main Cross-Validation Execution Function ---
-def run_cross_validation(num_folds=2, epochs=5, checkpoint_interval=10, resume_from_last_checkpoint=False):
+def run_cross_validation(num_folds=5, epochs=5, checkpoint_interval=10, resume_from_last_checkpoint=False):
     fold_performances = []  # List to store validation mAP for each fold
     total_emissions = 0.0   # Accumulator for overall CO2 emissions
 
@@ -223,4 +223,4 @@ def run_cross_validation(num_folds=2, epochs=5, checkpoint_interval=10, resume_f
 if __name__ == '__main__':
     # ACTION: Set 'resume_from_last_checkpoint=True' to continue training from the last saved epoch.
     # If the script successfully resumed Fold 2, it should now continue or complete the remaining folds.
-    run_cross_validation(num_folds=2, epochs=5, checkpoint_interval=10, resume_from_last_checkpoint=True)
+    run_cross_validation(num_folds=5, epochs=5, checkpoint_interval=10, resume_from_last_checkpoint=True)

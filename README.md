@@ -1,111 +1,141 @@
-# Gun Action Recognition Dataset
+# 🎯 **Real-Time Gun Detection using YOLOv12 with Cross-Validation**
 
-This repository contains scripts and utilities for preparing, processing, and training object detection models (YOLOv12s) on a custom gun action recognition dataset. The workflow includes frame extraction, annotation conversion, file renaming, K-fold dataset splitting, and model training with CO2 emissions tracking.
+> 🧠 **Deep Learning Project — B.Sc. Thesis (Computer & Automation Engineering)**  
+> **Università Politecnica delle Marche (UNIVPM)**  
+
+A robust, real-time firearm detection framework leveraging **YOLOv12** and **5-Fold Cross-Validation** for enhanced **generalization**, **sustainability**, and **performance stability**.
 
 ---
 
-## Dataset Structure
+## 🌟 **Highlights & Methodology**
 
-The dataset is organized as follows:
+### 🧩 Model Configurations
+| Variant | Description |
+| :-- | :-- |
+| 🟢 **YOLOv12-Small (Standard)** | Baseline configuration for performance comparison. |
+| 🔵 **YOLOv12-Large** | Larger model used to evaluate upper-bound accuracy and computational cost. |
+| 🟣 **YOLOv12-Small (Augmented)** | Small model trained with **aggressive augmentation** to enhance generalization and reduce overfitting. |
+
+### ⚖️ Cross-Validation
+- **5-Fold CV** ensures model performance consistency and prevents data-split bias.  
+- **Automated metric aggregation** and **epoch selection** scripts are included for analysis.
+
+### 🌱 Sustainability
+- Integrated **CO₂ emission tracking** using [CodeCarbon](https://codecarbon.io) for eco-aware training.
+
+---
+
+## 📁 **Project Structure**
+
 
 ```
-Gun_Action_Recognition_Dataset/
-├── Handgun/
-│   ├── PAH1_C1_P1_V1_HB_3/
-│   │   ├── video.mp4
-│   │   └── label.json
+GUN_DETECTION_YOLOv12/
+├── Model/                           <-- Source code and configuration for training
+│   ├── custom_hyp_s.yaml            <-- Augmentation settings (Mosaic, scale, etc.)
+│   ├── gun_detection_yolov12s.py    <-- Training script (YOLOv12s)
 │   └── ...
-├── No_Gun/
-│   └── ...
-├── frames/                # Generated: extracted frames and YOLO labels
-├── k_folds/               # Generated: K-fold split for cross-validation
-├── runs/                  # Generated: YOLO training outputs
-├── *.py                   # Scripts (see below)
-└── README.md
+├── Preprocessing/                   <-- Scripts and output data for dataset preparation
+│   ├── raw_dataset/                 <-- INPUT: Raw data/labels (multiclass, etc.)
+│   ├── frames/                      <-- INTERMEDIATE: Cleaned, unique images/labels
+├── Results/                         <-- Final analysis, metrics, and training artifacts
+│   ├── post_training_analysis.py    <-- Automated metric aggregation and plotting script
+│   └── Results YOLOv12s/l/          <-- Original run folders (containing best.pt, logs)
+├── Test/                            <-- Inference scripts and test images
+│   ├── Testing/                     <-- Test images/videos for inference
+│   └── test_all_best_models.py      <-- Script for testing all 'best.pt' models
+├──  k_folds/                        <-- FINAL INPUT: 5-Fold structure for CV
+
 ```
 
-- Each subfolder under `Handgun` or `No_Gun` contains a `video.mp4` and, if available, a `label.json` in COCO format.
 
 ---
 
-## Scripts Overview
+## ⚙️ **Pipeline Overview**
 
-### 1. `extract_frames_from_videos.py`
-
-- **Purpose:** Recursively extracts frames from all `video.mp4` files, draws bounding boxes if `label.json` is present, and generates YOLO-format `.txt` labels.
-- **Output:** Saves frames and labels in a mirrored folder structure under `frames/`.
-
-### 2. `rename_img_with_subfolder.py`
-
-- **Purpose:** Renames all `.jpg` and `.txt` files in `frames/` to include their subfolder path as a suffix, ensuring unique filenames for K-fold splitting.
-
-### 3. `k_fold_division.py`
-
-- **Purpose:** Splits all images (and corresponding labels) in `frames/` into K folds for cross-validation. Each fold contains separate `training` and `test` sets with `images/` and `labels/` subfolders.
-
-### 4. `gun_detection_yolov12s.py`
-
-- **Purpose:** Trains and evaluates a YOLOv12s model using the K-fold splits. Tracks CO2 emissions using [CodeCarbon](https://mlco2.github.io/codecarbon/). Supports checkpointing and resuming.
+> The project runs in **3 main phases**, ensuring modularity and full reproducibility.
 
 ---
 
-## Setup & Requirements
+### 🧮 **Phase 1 – Data Preparation** (`Preprocessing/`)
 
-- Python 3.8+
-- [Ultralytics YOLO](https://docs.ultralytics.com/)
-- [OpenCV](https://opencv.org/)
-- [CodeCarbon](https://mlco2.github.io/codecarbon/)
-- [PyTorch](https://pytorch.org/)
-- CUDA-enabled GPU (required for training)
+| File | Function | Description |
+| :-- | :-- | :-- |
+| `process_and_rename_dataset.py` | 🧹 Filter & Rename | Filters irrelevant classes (e.g., “dog”), remaps labels (`Gun → 0`, `Human → 1`), and renames files to avoid collisions. |
+| `k_fold_division.py` | 🔄 Cross-Validation Split | Randomly shuffles and divides cleaned data into **5 folds** for CV. |
 
-Install dependencies:
+---
+
+### 🧠 **Phase 2 – Training & Evaluation** (`Model/`)
+
+| File | Function | Description |
+| :-- | :-- | :-- |
+| `gun_detection_yolov12s_augmentation.py` | 🚀 Model Training | Executes 5-Fold training with **YOLOv12s**, applying augmentation from `custom_hyp_s.yaml`. |
+| `custom_hyp_s.yaml` | 🎨 Augmentation Config | Defines transformations (Mosaic, scaling, color) to improve model generalization. |
+
+---
+
+### 📊 **Phase 3 – Post-Analysis & Testing** (`Results/` & `Test/`)
+
+| File | Function | Description |
+| :-- | :-- | :-- |
+| `post_training_analysis.py` | 📈 Metrics & Plots | Aggregates performance metrics (mAP, F1), selects best epochs, and visualizes loss curves. |
+| `test_all_best_models.py` | 🧩 Batch Inference | Tests all `best.pt` checkpoints from each fold for each model configuration. |
+| `realtime_video_detection.py` | 🎥 Real-Time Detection | Performs live firearm detection on video streams. |
+
+---
+
+## ⚡ **Setup & Installation**
+
+### 🧰 Requirements
+Ensure you have:
+- Python ≥ 3.10  
+- CUDA-enabled GPU (recommended)  
+- Conda or venv environment
+
+### 📦 Installation
 ```bash
-pip install ultralytics opencv-python codecarbon torch
+pip install -r requirements.txt
 ```
 
----
+## 🚀 **Execution Steps**
 
-## Usage
+All commands **must** be run from the project root:  
+`GUN_DETECTION_YOLOv12/`
 
-1. **Extract frames and labels:**
-   ```bash
-   python extract_frames_from_videos.py
-   ```
-
-2. **Rename files for uniqueness:**
-   ```bash
-   python rename_img_with_subfolder.py
-   ```
-
-3. **Split dataset into K folds:**
-   ```bash
-   python k_fold_division.py
-   ```
-   - You can adjust the number of folds by editing the `num_groups` parameter in the script.
-
-4. **Train and evaluate YOLOv12s with K-fold cross-validation:**
-   ```bash
-   python gun_detection_yolov12s.py
-   ```
-   - Adjust `num_folds`, `epochs`, and other parameters as needed in the script.
+| Step | Command | Description |
+| :-- | :-- | :-- |
+| 1️⃣ | `python Preprocessing/process_and_rename_dataset.py` | Clean and prepare dataset. |
+| 2️⃣ | `python Preprocessing/k_fold_division.py --num_groups 5` | Generate 5-Fold structure. |
+| 3️⃣ | `python Model/gun_detection_yolov12s_augmentation.py` | Train YOLOv12-Small with augmentation. |
+| 4️⃣ | `python Test/test_all_best_models.py` | Run inference on all best models. |
+| 5️⃣ | `python Results/post_training_analysis.py` | Aggregate metrics and generate charts. |
 
 ---
 
-## Notes
+## 🏁 **Conclusion**
 
-- The scripts assume the presence of `video.mp4` and, if available, `label.json` in each subfolder.
-- YOLO labels are generated only if bounding box annotations are present.
-- CO2 emissions for each fold are logged in `co2_emissions_log.txt`.
-- The YOLOv12s model weights (`yolo12s.pt`) must be available in the working directory or accessible by Ultralytics.
+This project delivers a **robust**, **generalized**, and **eco-conscious** firearm detection framework based on **YOLOv12**.  
+By combining **Cross-Validation**, **Aggressive Augmentation**, and **Emission Tracking**, the system achieves both **technical performance** and **sustainability awareness**.
 
 ---
 
-## Citation
+### 🧩 **Key Takeaways**
 
-If you use this dataset or code, please cite the original authors and this repository.
+✅ **Generalization through Augmentation**  
+→ The augmented YOLOv12-Small outperformed the standard model in cross-fold consistency.  
+
+✅ **Statistical Validation via 5-Fold CV**  
+→ Ensures model reliability, minimizing variance across data partitions.  
+
+✅ **Performance vs. Efficiency Trade-off**  
+→ YOLOv12-Large provides maximum performance; Small variant offers efficiency with minimal loss.  
+
+✅ **Sustainability Tracking**  
+→ Integrated **CodeCarbon** provides quantifiable training impact on CO₂ emissions.  
+
+✅ **Reproducible Pipeline**  
+→ Clear, modular folder structure for complete experimental traceability.  
 
 ---
 
-## License
-
-This project is licensed under the MIT License.
+> 📘 *This repository forms part of the B.Sc. Thesis presented at Università Politecnica delle Marche (UNIVPM).*  

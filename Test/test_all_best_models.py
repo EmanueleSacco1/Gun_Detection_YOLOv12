@@ -35,6 +35,13 @@ MODELS_TO_TEST = {
     #"yolov12l_fold3": os.path.join(current_dir, "Results", "Results YOLOv12l", "runs", "detect", "train_fold_3", "weights", "best.pt"),
     #"yolov12l_fold4": os.path.join(current_dir, "Results", "Results YOLOv12l", "runs", "detect", "train_fold_4", "weights", "best.pt"),
     #"yolov12l_fold5": os.path.join(current_dir, "Results", "Results YOLOv12l", "runs", "detect", "train_fold_5", "weights", "best.pt"),
+
+    # YOLOv12-Small Folds w/Augmentation
+    "yolov12s_fold_augmentation1": os.path.join(current_dir, "Results", "Results YOLOv12s_Augmentation", "runs", "detect", "train_fold_1", "weights", "best.pt"),
+    "yolov12s_fold_augmentation2": os.path.join(current_dir, "Results", "Results YOLOv12s_Augmentation", "runs", "detect", "train_fold_2", "weights", "best.pt"),
+    "yolov12s_fold_augmentation3": os.path.join(current_dir, "Results", "Results YOLOv12s_Augmentation", "runs", "detect", "train_fold_3", "weights", "best.pt"),
+    "yolov12s_fold_augmentation4": os.path.join(current_dir, "Results", "Results YOLOv12s_Augmentation", "runs", "detect", "train_fold_4", "weights", "best.pt"),
+    "yolov12s_fold_augmentation5": os.path.join(current_dir, "Results", "Results YOLOv12s_Augmentation", "runs", "detect", "train_fold_5", "weights", "best.pt"),
 }
 
 # --- Main Testing Function ---
